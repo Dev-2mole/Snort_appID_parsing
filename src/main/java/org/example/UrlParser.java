@@ -129,7 +129,6 @@ public class UrlParser {
     }
 
     public static void saveUrlAsExcel(Map<String, String> urls, String destinationDir) throws IOException {
-        System.out.println("URL 엑셀 저장 시작합니당");
         // 오늘 날짜를 YYYYMMDD 형식으로 가져오기
         String dateFolder = new SimpleDateFormat("yyyyMMdd").format(new Date());
         File dateDir = new File(destinationDir, dateFolder);
@@ -144,32 +143,48 @@ public class UrlParser {
         }
 
         // Excel 파일 경로 설정
-        File excelFile = new File(resultDir, "urls.xlsx");
+        Map<String, Workbook> workbooks = new HashMap<>();
+        workbooks.put("client", new XSSFWorkbook());
+        workbooks.put("content_group", new XSSFWorkbook());
+        workbooks.put("payload", new XSSFWorkbook());
+        workbooks.put("service", new XSSFWorkbook());
+        workbooks.put("ssl_host_group", new XSSFWorkbook());
 
-        System.out.println("URLs Excel file will be created at: " + excelFile.getAbsolutePath()); // 저장 경로 출력
+        workbooks.forEach((key, workbook) -> {
+            Sheet sheet = workbook.createSheet("URLs");
 
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("URLs");
+            // 헤더 행 생성
+            String[] headers = {"URL", "Last Check Date", "New", "Success/Failure", "Response Code/Error", 
+                                "Redirection URL", "Redirection Response/Error", "Source Code Name"};
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
+            }
 
-        // Header
-        Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("URL");
-        headerRow.createCell(1).setCellValue("Filename");
+            // 데이터 행 추가
+            int rowNum = 1;
+            for (Map.Entry<String, String> entry : urls.entrySet()) {
+                if (entry.getValue().startsWith(key)) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(entry.getKey()); // URL
+                    row.createCell(1).setCellValue((String) null); // Last Check Date
+                    row.createCell(2).setCellValue((String) null); // New
+                    row.createCell(3).setCellValue((String) null); // Success/Failure
+                    row.createCell(4).setCellValue((String) null); // Response Code/Error
+                    row.createCell(5).setCellValue((String) null); // Redirection URL
+                    row.createCell(6).setCellValue((String) null); // Redirection Response/Error
+                    row.createCell(7).setCellValue(entry.getValue()); // Source Code Name
+                }
+            }
 
-        // Data
-        int rowNum = 1;
-        for (Map.Entry<String, String> entry : urls.entrySet()) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(entry.getKey());
-            row.createCell(1).setCellValue(entry.getValue());
-        }
+            // 파일에 작성
+            try (FileOutputStream fileOut = new FileOutputStream(new File(resultDir, key + ".xlsx"))) {
+                workbook.write(fileOut);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
-        // 파일에 작성
-        try (FileOutputStream fileOut = new FileOutputStream(excelFile)) {
-            workbook.write(fileOut);
-        } finally {
-            workbook.close();
-        }
-        System.out.println("URLs Excel file has been successfully created at: " + excelFile.getAbsolutePath()); // 실제 저장된 경로 출력
+        System.out.println("URLs Excel files have been successfully created in: " + resultDir.getAbsolutePath());
     }
 }
