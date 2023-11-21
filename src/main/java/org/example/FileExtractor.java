@@ -7,6 +7,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -22,12 +24,19 @@ public class FileExtractor {
         this.destinationDir = destinationDir;
     }
 
-     public File[] extractFile() throws IOException {
+    public File[] extractFile() throws IOException {
         List<File> extractedFiles = new ArrayList<>();
 
         if (checkHash == 1) {
             System.out.println("업데이트 파일 없음. 압축 해제 생략");
         } else if (checkHash == 0) {
+            // 오늘 날짜를 YYYYMMDD 형식으로 가져오기
+            String dateFolder = new SimpleDateFormat("yyyyMMdd").format(new Date());
+            File dateDir = new File(destinationDir, dateFolder);
+            if (!dateDir.exists()) {
+                dateDir.mkdirs();
+            }
+
             try (FileInputStream fileInputStream = new FileInputStream(localDownloadPath);
                  GzipCompressorInputStream gzipInputStream = new GzipCompressorInputStream(fileInputStream);
                  ArchiveInputStream tarInputStream = new TarArchiveInputStream(gzipInputStream)) {
@@ -37,7 +46,7 @@ public class FileExtractor {
                     if (entry instanceof TarArchiveEntry) {
                         TarArchiveEntry tarEntry = (TarArchiveEntry) entry;
                         if (!tarEntry.isDirectory()) {
-                            File outputFile = new File(destinationDir, tarEntry.getName());
+                            File outputFile = new File(dateDir, tarEntry.getName());
                             outputFile.getParentFile().mkdirs();
                             extractedFiles.add(outputFile);
 

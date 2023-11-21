@@ -39,12 +39,13 @@ public class Main {
             luaFiles = fileExtractor.extractFile();
 
             // 5. FileProcessor 호출
-            FileProcessor fileProcessor = new FileProcessor(luaFiles);
+            FileProcessor fileProcessor = new FileProcessor(luaFiles, destinationDir);
             fileProcessor.searchDirectoryAndComputeMD5();
 
             // 6. UrlParser 호출
             UrlParser urlParser = new UrlParser();
             urls = urlParser.parseFileContents(luaFiles);
+            UrlParser.saveUrlAsExcel(urls, destinationDir);
 
         } catch (Exception e) {
             e.printStackTrace();
