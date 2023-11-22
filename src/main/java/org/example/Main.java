@@ -49,12 +49,12 @@ public class Main {
                 UrlParser.saveUrlAsExcel(urls, destinationDir);
 
                 // 7. MD5 해시 비교를 위한 파일 경로 설정
-                String previousDayFilePath = "C:\\Temp\\20231121\\Result\\MD5HashValues.xlsx";  // 예시 경로
+                String previousDay = "20231121";  // 예시 경로
 
                 // 7. MD5 해시 비교 수행
                 // 만약 인자로 주어지는 값이 없으면 그냥 null과 비교함 -> Try catch로 예외처리 해야할듯
                 // 신규 URL 찾는 로직을 이 메소드에 넣고있는데 죽을거같다 살려줘
-                MD5Comparator.compareMD5HashesWithPreviousDay(previousDayFilePath,destinationDir);
+                MD5Comparator.compareMD5HashesWithPreviousDay(previousDay);
 
                 // 8. 다운로드한 tar.gz파일 삭제
                 DeleteDownloadedFile.deleteDownloadedFile("C:\\Temp\\snort-openappid.tar.gz");
@@ -66,12 +66,6 @@ public class Main {
             // Y. MD5 비교를 통해 신규 파일이 있을 경우, 해당 신규 URL만 검증 진행
             // Z. (인자로 폴더명 숫자를 받음 ) 해당 파일을 열어서 성공 부분 or 실패부분을 검증하는 로직 필요
 
-
-            // 1번의 UpdateFileChecker에서 사용한 인자가 안받아와짐 : 수정 필요 -> 가아아장 마지막에 추가할듯 (완)
-            // 6번의 UrlParser에서 각각의 분야에 맞추어 엑셀값을 떨구도록 수정 필요 -> 수정 (완)
-            // 6번의 UrlParser에서 저장되는 내용을 바꾸어야 함 URL/파싱날짜/ 신규여부/ 성공or실패/응답코드or 에러메세지/ 리다이렉트 URL/ 응답코드 / 소스코드명 (수정 완)
-            // 검증 로직 추가하면서 위 1~7번이 불러오는 방식을 if문이든, 매개변수든, 처리하면 될 듯
-            // 파일 삭제처리 다운로드해서 받은 파일을 삭제처리하는 로직 필요 : 근데 덮어쓰여지기 처리 되긴함 (완)
 
 
         } catch (Exception e) {

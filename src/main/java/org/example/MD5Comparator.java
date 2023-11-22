@@ -12,15 +12,16 @@ import java.util.*;
 
 public class MD5Comparator {
 
-    public static void compareMD5HashesWithPreviousDay(String previousDayFilePath, String destinationDir) {
+    public static void compareMD5HashesWithPreviousDay(String previousDay) {
         String currentDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
         String currentDayFilePath = "C:\\Temp\\" + currentDate + "\\Result\\MD5HashValues.xlsx";
+        String previousDayFilePath = "C:\\Temp\\" + previousDay + "\\Result\\MD5HashValues.xlsx";
+        String destinationDir = "C:\\Temp\\";  // 파일이 저장되는 기본 경로
     
         Map<String, String> md5HashesCurrent = readMD5HashesFromFile(currentDayFilePath);
         Map<String, String> md5HashesPrevious = readMD5HashesFromFile(previousDayFilePath);
     
-        // 여기에서 destinationDir 매개변수 추가
-        compareMD5Hashes(md5HashesCurrent, md5HashesPrevious, destinationDir);
+        compareMD5Hashes(md5HashesCurrent, md5HashesPrevious, destinationDir, previousDay);
     }
 
     private static Map<String, String> readMD5HashesFromFile(String filePath) {
@@ -41,44 +42,44 @@ public class MD5Comparator {
         return md5Hashes;
     }
 
-    private static void compareMD5Hashes(Map<String, String> md5HashesCurrent, Map<String, String> md5HashesPrevious, String destinationDir) {
+    private static void compareMD5Hashes(Map<String, String> md5HashesCurrent, Map<String, String> md5HashesPrevious, String destinationDir, String previousDay) {
         boolean differencesFound = false;
         Map<String, String> differentFiles = new HashMap<>();
-    
+
         for (String filename : md5HashesCurrent.keySet()) {
             String md5HashCurrent = md5HashesCurrent.get(filename);
             String md5HashPrevious = md5HashesPrevious.getOrDefault(filename, "");
-    
+
             if (!md5HashCurrent.equals(md5HashPrevious)) {
                 System.out.println("MD5 hash difference found for file: " + filename);
-                differentFiles.put(filename, md5HashCurrent);
+                differentFiles.put(filename, getCategoryFromFilename(filename));
                 differencesFound = true;
             }
         }
-    
-        if (!differencesFound) {
-            System.out.println("No differences in MD5 hashes found.");
-        } else {
+
+        if (differencesFound) {
             try {
-                updateNewUrls(differentFiles, destinationDir);
+                updateNewUrls(differentFiles, destinationDir, previousDay);
             } catch (IOException e) {
                 System.out.println("An error occurred while updating new URLs: " + e.getMessage());
                 e.printStackTrace();
             }
+        } else {
+            System.out.println("No differences in MD5 hashes found.");
         }
     }
 
-    private static void updateNewUrls(Map<String, String> differentFiles, String destinationDir) throws IOException {
+    private static void updateNewUrls(Map<String, String> differentFiles, String destinationDir, String previousDay) throws IOException {
         String dateFolder = new SimpleDateFormat("yyyyMMdd").format(new Date());
-        File dateDir = new File(destinationDir, dateFolder);
-        File resultDir = new File(dateDir, "Result");
-
+    
         for (String category : differentFiles.keySet()) {
-            String previousFilePath = destinationDir + File.separator + differentFiles.get(category) + File.separator + "Result" + File.separator + category + ".xlsx";
-            String currentFilePath = resultDir.getAbsolutePath() + File.separator + category + ".xlsx";
+            // 예: "client", "content_group", "payload", "service", "ssl_host_group"
+            String currentFilePath = destinationDir + dateFolder + "\\Result\\" + differentFiles.get(category) + ".xlsx";
+            String previousFilePath = destinationDir + previousDay + "\\Result\\" + differentFiles.get(category) + ".xlsx";
+    
             Set<String> previousUrls = readUrlsFromExcel(previousFilePath);
             Map<String, Integer> currentUrls = readUrlsFromExcelWithRow(currentFilePath);
-
+    
             for (String url : currentUrls.keySet()) {
                 if (!previousUrls.contains(url)) {
                     // 새로운 URL 발견
@@ -86,7 +87,7 @@ public class MD5Comparator {
                 }
             }
         }
-    }
+    }    
 
     private static Set<String> readUrlsFromExcel(String filePath) throws IOException {
         Set<String> urls = new HashSet<>();
@@ -135,4 +136,20 @@ public class MD5Comparator {
             }
         }
     }
+
+    private static String getCategoryFromFilename(String filename) {
+        if (filename.startsWith("client")) {
+            return "client";
+        } else if (filename.startsWith("content_group")) {
+            return "content_group";
+        } else if (filename.startsWith("payload")) {
+            return "payload";
+        } else if (filename.startsWith("service")) {
+            return "service";
+        } else if (filename.startsWith("ssl_host_group")) {
+            return "ssl_host_group";
+        } else {
+            return "unknown"; // 파일명이 어떤 카테고리에도 속하지 않는 경우
+        }
+    }    
 }
