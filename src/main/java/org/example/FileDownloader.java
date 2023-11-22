@@ -41,7 +41,6 @@ public class FileDownloader {
             System.out.println("HTTP 오류: " + responseCode);
         }
         httpURLConnection.disconnect();
-        
         return result;
     }
 }

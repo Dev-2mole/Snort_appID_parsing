@@ -29,7 +29,7 @@ public class DownloadLinkFinder {
                 System.out.println("링크: " + href);
             }
         }
-
+        driver.quit();
         return downloadLink;
     }
 }

@@ -52,8 +52,7 @@ public class Main {
                 String previousDay = "20231121";  // 예시 경로
 
                 // 7. MD5 해시 비교 수행
-                // 만약 인자로 주어지는 값이 없으면 그냥 null과 비교함 -> Try catch로 예외처리 해야할듯
-                // 신규 URL 찾는 로직을 이 메소드에 넣고있는데 죽을거같다 살려줘
+                // 만약 인자로 주어지는 값이 없으면 그냥 null과 비교함 -> 매개변수 받아올때 Try catch로 예외처리 해야할듯
                 MD5Comparator.compareMD5HashesWithPreviousDay(previousDay);
 
                 // 8. 다운로드한 tar.gz파일 삭제
@@ -65,7 +64,6 @@ public class Main {
             // X.(아무 인자도 받지 않았을 때) 가장 최신의 파일을 찾아서, 해당 파일을 열고, 전체 검증
             // Y. MD5 비교를 통해 신규 파일이 있을 경우, 해당 신규 URL만 검증 진행
             // Z. (인자로 폴더명 숫자를 받음 ) 해당 파일을 열어서 성공 부분 or 실패부분을 검증하는 로직 필요
-
 
 
         } catch (Exception e) {
